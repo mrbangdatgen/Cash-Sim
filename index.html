@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CashSim Secure</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { margin:0; padding:0; background:#000; color:#fff; font-family:-apple-system, sans-serif;
+      display:flex; flex-direction:column; align-items:center; height:100vh; }
+    header{padding:50px 20px 10px;color:#00d632;text-align:center;}
+    #balance{font-size:36px;font-weight:bold;margin:20px 0;}
+    .input-section{width:80%; max-width:300px;}
+    input[type="number"]{width:100%;padding:15px;font-size:1.2em;border-radius:10px;border:none;background:#1a1a1a;color:#fff;margin-bottom:15px;}
+    button{width:100%;padding:15px;font-size:1.1em;border-radius:10px;margin-bottom:10px;border:none;background:#00d632;color:#000;font-weight:bold;}
+    .edit-btn{background:#333;color:#fff;width:100%;padding:10px;font-size:1em;margin-bottom:20px;}
+    #history{width:80%;max-width:300px;color:#ccc;font-size:0.9em;overflow:auto;flex:1;}
+    .hist-item{margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:5px;}
+    footer{padding:20px;font-size:0.8em;color:#555;}
+    #passcodeOverlay{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+    #passcodeOverlay input{font-size:1.3em;padding:15px;border-radius:10px;border:none;background:#1a1a1a;color:#fff;width:60%;margin-bottom:20px;text-align:center;}
+    #passcodeOverlay button{width:60%;background:#00d632;color:#000;}
+  </style>
+</head>
+<body>
+  <div id="passcodeOverlay">
+    <h2>Enter Passcode</h2>
+    <input id="pc" type="password" maxlength="4" placeholder="1234" />
+    <button onclick="unlock()">Unlock</button>
+  </div>
+  <header><h2>Cash Balance</h2></header>
+  <div id="balance">$<span id="bal">0.00</span></div>
+  <div class="input-section">
+    <input type="number" id="amt" placeholder="Amount" />
+    <button onclick="sendMoney()">Send</button>
+    <button onclick="receiveMoney()">Receive</button>
+    <button class="edit-btn" onclick="editPasscode()">Change Passcode</button>
+  </div>
+  <div id="history"></div>
+  <footer>CashSim Prototype — Not affiliated with Cash App</footer>
+
+<script>
+  const passcodeKey = 'cashsim_pass';
+  const balKey = 'cashsim_bal';
+  const histKey = 'cashsim_hist';
+  let bal = parseFloat(localStorage.getItem(balKey)) || 0;
+  let hist = JSON.parse(localStorage.getItem(histKey)) || [];
+  function updateDisplay(){document.getElementById('bal').textContent = bal.toFixed(2);}
+  function save(){localStorage.setItem(balKey,bal); localStorage.setItem(histKey, JSON.stringify(hist));}
+  function redrawHist(){
+    const hd = document.getElementById('history');
+    hd.innerHTML = hist.map(e => `<div class="hist-item">${e.time}: ${e.type} $${e.amount.toFixed(2)}</div>`).join('');
+  }
+  function sendMoney(){
+    const a = parseFloat(document.getElementById('amt').value);
+    if(!a||a<=0) return alert('Enter valid amount');
+    if(a>bal) return alert('Insufficient balance');
+    bal -= a; hist.unshift({time: new Date().toLocaleTimeString(), type: 'Sent', amount: a});
+    updateDisplay(); redrawHist(); save(); alert(`You sent $${a.toFixed(2)}`);
+  }
+  function receiveMoney(){
+    const a = parseFloat(document.getElementById('amt').value);
+    if(!a||a<=0) return alert('Enter valid amount');
+    bal += a; hist.unshift({time: new Date().toLocaleTimeString(), type: 'Received', amount: a});
+    updateDisplay(); redrawHist(); save(); alert(`You received $${a.toFixed(2)}`);
+  }
+  function editPasscode(){
+    const p = prompt('Enter new 4‑digit passcode:');
+    if(p && /^\d{4}$/.test(p)){ localStorage.setItem(passcodeKey, p); alert('Passcode updated'); }
+    else alert('Must be exactly 4 digits');
+  }
+  function unlock(){
+    const stored = localStorage.getItem(passcodeKey) || '1234';
+    if(document.getElementById('pc').value === stored){
+      document.getElementById('passcodeOverlay').style.display = 'none';
+    } else alert('Incorrect passcode');
+  }
+  updateDisplay(); redrawHist();
+</script>
+</body>
+</html>
