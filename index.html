@@ -1,80 +1,328 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>CashSim Secure</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CashSim</title>
   <style>
-    body { margin:0; padding:0; background:#000; color:#fff; font-family:-apple-system, sans-serif;
-      display:flex; flex-direction:column; align-items:center; height:100vh; }
-    header{padding:50px 20px 10px;color:#00d632;text-align:center;}
-    #balance{font-size:36px;font-weight:bold;margin:20px 0;}
-    .input-section{width:80%; max-width:300px;}
-    input[type="number"]{width:100%;padding:15px;font-size:1.2em;border-radius:10px;border:none;background:#1a1a1a;color:#fff;margin-bottom:15px;}
-    button{width:100%;padding:15px;font-size:1.1em;border-radius:10px;margin-bottom:10px;border:none;background:#00d632;color:#000;font-weight:bold;}
-    .edit-btn{background:#333;color:#fff;width:100%;padding:10px;font-size:1em;margin-bottom:20px;}
-    #history{width:80%;max-width:300px;color:#ccc;font-size:0.9em;overflow:auto;flex:1;}
-    .hist-item{margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:5px;}
-    footer{padding:20px;font-size:0.8em;color:#555;}
-    #passcodeOverlay{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;}
-    #passcodeOverlay input{font-size:1.3em;padding:15px;border-radius:10px;border:none;background:#1a1a1a;color:#fff;width:60%;margin-bottom:20px;text-align:center;}
-    #passcodeOverlay button{width:60%;background:#00d632;color:#000;}
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 30px 20px 15px;
+      color: #00d632;
+      font-weight: 600;
+      font-size: 1.5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    main {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 0 20px 70px;
+      position: relative;
+    }
+    /* Tabs container */
+    nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: #111;
+      display: flex;
+      border-top: 1px solid #222;
+      z-index: 10;
+    }
+    nav button {
+      flex: 1;
+      background: none;
+      border: none;
+      color: #666;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 6px 0 3px;
+    }
+    nav button.active {
+      color: #00d632;
+    }
+    nav button svg {
+      margin-bottom: 2px;
+      fill: currentColor;
+      width: 22px;
+      height: 22px;
+    }
+    /* Home tab */
+    #homeTab #balance {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 20px 0 25px;
+      text-align: center;
+      letter-spacing: 1.5px;
+    }
+    #homeTab button.action-btn {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: #00d632;
+      border: none;
+      border-radius: 12px;
+      color: #000;
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    #homeTab button.action-btn:active {
+      background: #00b227;
+    }
+    /* Activity tab */
+    #activityTab {
+      color: #ccc;
+    }
+    #activityTab .hist-item {
+      border-bottom: 1px solid #222;
+      padding: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+    }
+    #activityTab .hist-type {
+      font-weight: 600;
+      color: #00d632;
+    }
+    #activityTab .hist-time {
+      font-size: 0.75rem;
+      color: #666;
+    }
+    /* Card tab */
+    #cardTab {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 40px;
+    }
+    #cardTab .card-placeholder {
+      width: 320px;
+      max-width: 90vw;
+      height: 190px;
+      background: linear-gradient(135deg, #00d632 0%, #007f0e 100%);
+      border-radius: 20px;
+      box-shadow: 0 0 20px #00d632aa;
+      color: #000;
+      font-weight: 700;
+      font-size: 1.3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 25px 30px;
+      text-align: center;
+      user-select: none;
+    }
+    /* Settings tab */
+    #settingsTab {
+      padding-top: 10px;
+    }
+    #settingsTab button {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #000;
+      background: #00d632;
+      transition: background 0.3s ease;
+    }
+    #settingsTab button:active {
+      background: #00b227;
+    }
+    #settingsTab .reset-balance {
+      background: #d13434;
+      color: #fff;
+    }
+    #settingsTab .reset-balance:active {
+      background: #a12828;
+    }
+    /* Footer */
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #555;
+      padding: 15px 10px 25px;
+      flex-shrink: 0;
+    }
+    /* Passcode overlay */
+    #passcodeOverlay {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: #000;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 30px;
+    }
+    #passcodeOverlay h2 {
+      color: #00d632;
+      margin-bottom: 25px;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+    #passcodeOverlay input {
+      font-size: 1.5rem;
+      padding: 15px 12px;
+      border-radius: 12px;
+      border: none;
+      width: 150px;
+      text-align: center;
+      background: #111;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    #passcodeOverlay button {
+      background: #00d632;
+      color: #000;
+      border: none;
+      padding: 15px 60px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    /* Send flow overlays */
+    #sendOverlay, #confirmOverlay {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: #000;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 20px;
+    }
+    #sendOverlay h2, #confirmOverlay h2 {
+      color: #00d632;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 2rem;
+      text-align: center;
+    }
+    #sendOverlay input, #sendOverlay select {
+      font-size: 1.2rem;
+      padding: 15px 12px;
+      border-radius: 12px;
+      border: none;
+      width: 100%;
+      max-width: 320px;
+      margin-bottom: 20px;
+      background: #111;
+      color: #fff;
+    }
+    #sendOverlay input::placeholder {
+      color: #666;
+    }
+    #sendOverlay button, #confirmOverlay button {
+      background: #00d632;
+      color: #000;
+      border: none;
+      padding: 15px 50px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 6px;
+      min-width: 120px;
+    }
+    #sendOverlay button.cancel-btn {
+      background: #d13434;
+      color: #fff;
+    }
+    #sendOverlay button.cancel-btn:active {
+      background: #a12828;
+    }
+    /* Fake cashtags dropdown styling */
+    #cashtagList {
+      max-height: 120px;
+      overflow-y: auto;
+      background: #111;
+      border-radius: 12px;
+      margin-top: -14px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 320px;
+      color: #fff;
+      border: 1px solid #00d632;
+      font-size: 1rem;
+    }
+    #cashtagList div {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #222;
+    }
+    #cashtagList div:hover {
+      background: #00d632;
+      color: #000;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 400px) {
+      #cardTab .card-placeholder {
+        width: 90vw;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="passcodeOverlay">
-    <h2>Enter Passcode</h2>
-    <input id="pc" type="password" maxlength="4" placeholder="1234" />
-    <button onclick="unlock()">Unlock</button>
-  </div>
-  <header><h2>Cash Balance</h2></header>
-  <div id="balance">$<span id="bal">0.00</span></div>
-  <div class="input-section">
-    <input type="number" id="amt" placeholder="Amount" />
-    <button onclick="sendMoney()">Send</button>
-    <button onclick="receiveMoney()">Receive</button>
-    <button class="edit-btn" onclick="editPasscode()">Change Passcode</button>
-  </div>
-  <div id="history"></div>
-  <footer>CashSim Prototype — Not affiliated with Cash App</footer>
 
-<script>
-  const passcodeKey = 'cashsim_pass';
-  const balKey = 'cashsim_bal';
-  const histKey = 'cashsim_hist';
-  let bal = parseFloat(localStorage.getItem(balKey)) || 0;
-  let hist = JSON.parse(localStorage.getItem(histKey)) || [];
-  function updateDisplay(){document.getElementById('bal').textContent = bal.toFixed(2);}
-  function save(){localStorage.setItem(balKey,bal); localStorage.setItem(histKey, JSON.stringify(hist));}
-  function redrawHist(){
-    const hd = document.getElementById('history');
-    hd.innerHTML = hist.map(e => `<div class="hist-item">${e.time}: ${e.type} $${e.amount.toFixed(2)}</div>`).join('');
-  }
-  function sendMoney(){
-    const a = parseFloat(document.getElementById('amt').value);
-    if(!a||a<=0) return alert('Enter valid amount');
-    if(a>bal) return alert('Insufficient balance');
-    bal -= a; hist.unshift({time: new Date().toLocaleTimeString(), type: 'Sent', amount: a});
-    updateDisplay(); redrawHist(); save(); alert(`You sent $${a.toFixed(2)}`);
-  }
-  function receiveMoney(){
-    const a = parseFloat(document.getElementById('amt').value);
-    if(!a||a<=0) return alert('Enter valid amount');
-    bal += a; hist.unshift({time: new Date().toLocaleTimeString(), type: 'Received', amount: a});
-    updateDisplay(); redrawHist(); save(); alert(`You received $${a.toFixed(2)}`);
-  }
-  function editPasscode(){
-    const p = prompt('Enter new 4‑digit passcode:');
-    if(p && /^\d{4}$/.test(p)){ localStorage.setItem(passcodeKey, p); alert('Passcode updated'); }
-    else alert('Must be exactly 4 digits');
-  }
-  function unlock(){
-    const stored = localStorage.getItem(passcodeKey) || '1234';
-    if(document.getElementById('pc').value === stored){
-      document.getElementById('passcodeOverlay').style.display = 'none';
-    } else alert('Incorrect passcode');
-  }
-  updateDisplay(); redrawHist();
-</script>
-</body>
-</html>
+<!-- Passcode lock screen -->
+<div id="passcodeOverlay">
+  <h2>Enter Passcode</h2>
+  <input id="pcInput" type="password" maxlength="4" placeholder="1234" inputmode="numeric" />
+  <button onclick="unlock()">Unlock</button>
+</div>
+
+<header>CashSim</header>
+
+<main>
+  <!-- Home Tab -->
+  <section id="homeTab" class="tabContent" style="display:none;">
+
+    <div id="balance">$0.00</div>
+    <button class="action-btn" id="btnSendMoney">Send Money</button>
+    <button class="action-btn" onclick="receiveMoney()">Receive Money</button>
+
+  </section>
+
+  <!-- Activity Tab -->
+  <section id="activityTab" class="tabContent" style="display:none;">
+    <div id="history"></div>
+  </section>
+
+  <!-- Card Tab -->
+  <section id="cardTab" class="tabContent" style="display:none;">
+    <div class="card-placeholder">
+      <div>CashSim Card</div>
+      <div style="margin-top: 25px; font-size: 1rem;">**** **** **** 1234</div>
+      <div style="margin-top: 8px; font-size: 0.85rem;">Valid Thru 12/34</div>
+    </div>
+  </section>
+
+  <!-- Settings Tab
